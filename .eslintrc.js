@@ -7,9 +7,6 @@ module.exports = {
     'plugin:vue/essential',
     '@vue/standard'
   ],
-  parserOptions: {
-    parser: 'babel-eslint'
-  },
   rules: {
     'no-console': 'off',
     'no-debugger': 'off'
