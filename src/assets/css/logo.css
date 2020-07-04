@@ -3,3 +3,30 @@ html, body ,#app {
     margin: 0;
     padding: 0;
 }
+
+.el-breadcrumb {
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+.el-card {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) !important;
+}
+
+.el-table {
+    font-size: 12px;
+}
+.el-table .cell {
+  display: flex;
+}
+.el-button--small {
+    padding: 9px 12px;
+}
+
+.el-pagination {
+    margin-top: 15px;
+}
+
+body .el-table th.gutter { /*边框线不齐*/
+    display: table-cell !important;
+}

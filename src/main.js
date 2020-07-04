@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import './plugins/element.js'
+import 'default-passive-events'
 
 // 导入全局样式表
 import './assets/css/logo.css'
@@ -13,6 +14,13 @@ import './assets/css/fonts/iconfont.css'
 import axios from 'axios'
 // 配置请求的路径
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
+
+// 配置axios拦截器
+axios.interceptors.request.use(config => {
+    config.headers.Authorization = window.sessionStorage.getItem('token')
+  // 在最后必须要return config
+  return config
+})
 
 // 挂载到全局的请求axios
 Vue.prototype.$http = axios
