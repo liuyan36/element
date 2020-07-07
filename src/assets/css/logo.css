@@ -16,7 +16,7 @@ html, body ,#app {
 .el-table {
     font-size: 12px;
 }
-.el-table .cell {
+.el-table .aaa {
   display: flex;
 }
 .el-button--small {

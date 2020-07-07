@@ -132,24 +132,20 @@ export default {
     var checkEmail = (rule, value, cb) => {
       // 验证邮箱的正则表达式
       const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
-
       if (regEmail.test(value)) {
         return cb();
       }
       cb(new Error("请输入合法的邮箱"));
     };
-
     // 验证手机号的规则
     var checkMobile = (rule, value, cb) => {
       // 验证手机号的正则表达式
       const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/;
-
       if (regMobile.test(value)) {
         return cb();
       }
       cb(new Error("请输入合法的手机号"));
     };
-
     return {
       // 获取用户列表的参数对象
       queryInfo: {
@@ -172,7 +168,6 @@ export default {
       editDialogVisible: false,
       // 查询到的用户信息duix
       editFrom: {},
-
       // 验证规则名称名称对象
       addFromRules: {
         username: [
@@ -238,12 +233,10 @@ export default {
       );
       if (res.meta.status !== 200) {
         userinfo.mg_state = !userinfo.mg_state;
-
         return this.$message.error("更新用户状态失败");
       }
       this.$message.success("更新用户状态成功");
     },
-
     // 监听添加用户对话框的关闭事件，只要触发就关闭，进行重置
     addDialogClosed() {
       this.$refs.addFromRef.resetFields();
@@ -292,7 +285,6 @@ export default {
           email: this.editFrom.email,
           mobile: this.editFrom.mobile
         })
-
         if (res.meta.status !== 200) {
           this.$message.error('更新用户信息失败！')
         }
@@ -312,14 +304,11 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).catch(err => err)
-
         // 如果用户确认删除，则返回值为字符串 confirm
         // 如果用户取消删除，则返回值为字符串 cancel
         if(confirmResult !== 'confirm') {
           return this.$message.info('你已经取消删除！')
         }
-
-
         const {data: res} = await this.$http.delete('users/' + id)
         if (res.meta.status !== 200) {
           this.$message.error('已取消删除')
@@ -327,11 +316,11 @@ export default {
         this.$message.success('删除用户成功')
         this.getUsersList()
     },
-
     // 箭头pagesize的改变事件
     handleSizeChange(newSize) {
       this.queryInfo.pagesize = newSize;
       this.getUsersList();
+      console.log(newSize)
     },
     // 箭头页码值得改变事件
     handleCurrentChange(newPage) {
