@@ -78,7 +78,7 @@
                 type="primary"
                 icon="el-icon-edit"
                 size="mini"
-                @click="showEditDialog(scope.row.id, scope.row.roleName)"
+                @click="showEditDialog(scope.row)"
               >编辑</el-button>
             </el-tooltip>
             <el-tooltip effect="dark" placement="top">
@@ -120,11 +120,21 @@
     </el-dialog>
 
     <!--修改用户对话框-->
-    <el-dialog title="修改用户权限" :visible.sync="editDialogVisible" width="50%">
-      <span>这是一段信息</span>
+    <el-dialog title="修改用户权限" :visible.sync="editRolesDialogVisible" width="50%">
+      <el-form :model="editRolesFrom" ref="editRolesRef" :rules="editRolesRules" label-width="100px">
+        <el-form-item label="分类昵称" prop="editRolesFromName">
+          <el-input v-model="editRolesFrom.editRolesFromName"></el-input>
+          <!--使用disabled来禁用-->
+        </el-form-item>
+
+        <el-form-item label="角色描述" prop="editRolesFromDesc">
+          <el-input v-model="editRolesFrom.editRolesFromDesc"></el-input>
+          <!--使用disabled来禁用-->
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editDialogVisible = false">确 定</el-button>
+        <el-button @click="editRolesDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editRolesInfo">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -160,11 +170,17 @@ export default {
       // 点击添加对话框的显示与隐藏
       rolesDialogVisible: false,
       // 控制修改对话框的显示与隐藏
-      editDialogVisible: false,
+      editRolesDialogVisible: false,
       // 控制对话框的显示与隐藏
       steRightDialogVisible: false,
       //所有权限的数据
       rightsList: [],
+      // 添加编辑表单的规则对象
+      editRolesRules: {
+        editRolesFromName: [
+          { required: true, message: "请输入角色名称", trigger: "blur" }
+        ]
+      },
       // 树形控件的绑定对象
       terrProps: {
         label: 'authName',
@@ -173,7 +189,13 @@ export default {
       // 默认选中的节点id值数组
       defEdKy: [],
       // 当前即将分配权限的角色id
-      roleId:''
+      roleId:'',
+      // 编辑修改用户规则
+      editRolesFrom: {
+        editRolesFromId: 0,
+        editRolesFromName: '',
+        editRolesFromDesc: ''
+      },
     };
   },
   created() {
@@ -207,14 +229,6 @@ export default {
         this.rolesDialogVisible = false;
         this.getRolesList();
       });
-    },
-    /// 展示编辑用户的对话框
-    async showEditDialog(id) {
-      // console.log(id)
-      const { data: res } = await this.$http.put("roles/" + id);
-      console.log(id);
-      console.log(res);
-      this.editDialogVisible = true;
     },
     // 根据id删除该用户
     async removeRolesById(id) {
@@ -318,7 +332,33 @@ export default {
       this.getRolesList()
       // 然后将其关闭
       this.steRightDialogVisible = false
-     }
+     },
+    /// 展示编辑用户的对话框
+    async showEditDialog(roleList) {
+      console.log(roleList)
+      this.editRolesFrom.editRolesFromId = roleList.id
+      this.editRolesFrom.editRolesFromName = roleList.roleName
+      this.editRolesFrom.editRolesFromDesc = roleList.roleDesc
+      this.editRolesDialogVisible = true
+    },
+    // 提交并修改用户对话的内容
+    editRolesInfo() {
+       this.$refs.editRolesRef.validate(async valid => {
+         const {data: res} = await this.$http.put('roles/' + this.editRolesFrom.editRolesFromId, {
+           roleName: this.editRolesFrom.editRolesFromName,
+           roleDesc: this.editRolesFrom.editRolesFromDesc
+         })
+         console.log({data: res})
+
+         if(res.meta.status !== 200) {
+           return this.$message.error('修改用户权限失败')
+         }
+
+         this.$message.success('修改用户成功')
+         this.getRolesList()
+         this.editRolesDialogVisible = false
+       })
+    }
   }
 };
 </script>
