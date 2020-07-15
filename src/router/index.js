@@ -8,6 +8,11 @@ import Rights from '../components/power/Rights.vue'
 import Roles from '../components/power/Roles.vue'
 import Cate from '../components/goods/Cate.vue'
 import Params from '../components/goods/Params.vue'
+<<<<<<< HEAD
+=======
+import GoodsList from '../components/goods/GoodsList.vue'
+import Add from '../components/goods/Add.vue'
+>>>>>>> cb0fb92... aaa
 
 // 解决路由重复报错问题
 const originalPush = VueRouter.prototype.push
@@ -54,6 +59,17 @@ const routes = [
       {
         path: '/params',
         component: Params
+<<<<<<< HEAD
+=======
+      },
+      {
+        path: '/goods',
+        component: GoodsList
+      },
+      {
+        path: '/goods/add',
+        component: Add
+>>>>>>> cb0fb92... aaa
       }
     ]
   },
