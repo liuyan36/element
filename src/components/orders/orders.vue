@@ -60,7 +60,7 @@
         </el-form-item>
         <el-form-item label="详细地址" prop="modifyFrom2">
           <el-input v-model="modifyFrom.modifyFrom2"></el-input>
-        </el-form-item>-->
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="modifyDialogVisible = false">取 消</el-button>

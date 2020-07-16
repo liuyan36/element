@@ -11,6 +11,7 @@ import Params from '../components/goods/Params.vue'
 import GoodsList from '../components/goods/GoodsList.vue'
 import Add from '../components/goods/Add.vue'
 import Orders from '../components/orders/orders.vue'
+import Repost from '../components/repost/Repost.vue'
 
 // 解决路由重复报错问题
 const originalPush = VueRouter.prototype.push
@@ -69,6 +70,10 @@ const routes = [
       {
         path: '/orders',
         component: Orders
+      },
+      {
+        path: '/reports',
+        component: Repost
       }
     ]
   },
