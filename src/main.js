@@ -1,11 +1,8 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-<<<<<<< HEAD
-=======
 // 导入富文本编辑器
 import VueQuillEditor from 'vue-quill-editor'
->>>>>>> cb0fb92... aaa
 import './plugins/element.js'
 import 'default-passive-events'
 
@@ -16,14 +13,11 @@ import './assets/css/logo.css'
 import './assets/css/fonts/iconfont.css'
 import TreeTable from 'vue-table-with-tree-grid'
 
-<<<<<<< HEAD
-=======
 // 导入富文本编辑器对应样式
 import 'quill/dist/quill.core.css' // import styles
 import 'quill/dist/quill.snow.css' // for snow theme
 import 'quill/dist/quill.bubble.css' // for bubble theme
 
->>>>>>> cb0fb92... aaa
 // 配置axios请求发送
 import axios from 'axios'
 // 配置请求的路径
@@ -41,8 +35,6 @@ Vue.prototype.$http = axios
 
 Vue.component('tree-table', TreeTable)
 
-<<<<<<< HEAD
-=======
 // 全局定义格式化时间过滤器,叫做dateFormat
 Vue.filter('dateFormat', function(originVal){
   const dt = new Date(originVal)
@@ -62,7 +54,6 @@ Vue.filter('dateFormat', function(originVal){
 // 将富文本编辑器，注册为全局可用的组件
 Vue.use(VueQuillEditor)
 
->>>>>>> cb0fb92... aaa
 Vue.config.productionTip = false
 
 new Vue({

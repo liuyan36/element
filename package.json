@@ -16,13 +16,9 @@
     "default-passive-events": "^2.0.0",
     "element-ui": "^2.4.5",
     "less-loader": "^6.1.3",
-<<<<<<< HEAD
-    "vue": "^2.6.11",
-=======
     "lodash": "^4.17.19",
     "vue": "^2.6.11",
     "vue-quill-editor": "^3.0.6",
->>>>>>> cb0fb92... aaa
     "vue-router": "^3.2.0",
     "vue-table-with-tree-grid": "^0.2.4"
   },
