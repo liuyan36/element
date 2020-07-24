@@ -28,6 +28,7 @@
       <!--用户列表区-->
       <el-table :data="userList" stripe border>
         <el-table-column type="index"></el-table-column>
+        <el-table-column label="ID" prop="id"></el-table-column>
         <el-table-column label="姓名" prop="username"></el-table-column>
         <el-table-column label="邮箱" prop="email"></el-table-column>
         <el-table-column label="电话" prop="mobile"></el-table-column>
@@ -35,6 +36,11 @@
         <el-table-column label="状态">
           <template slot-scope="scope">
             <el-switch @change="userStateChange(scope.row)" v-model="scope.row.mg_state"></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间">
+          <template slot-scope="scope">
+            {{scope.row.create_time | dateFormat}}
           </template>
         </el-table-column>
         <el-table-column label="操作">

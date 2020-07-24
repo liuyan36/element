@@ -1,17 +1,34 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '../components/Login.vue'
-import Home from '../components/Home.vue'
-import Welcome from '../components/Welcome.vue'
-import Users from '../components/user/Users.vue'
-import Rights from '../components/power/Rights.vue'
-import Roles from '../components/power/Roles.vue'
-import Cate from '../components/goods/Cate.vue'
-import Params from '../components/goods/Params.vue'
-import GoodsList from '../components/goods/GoodsList.vue'
-import Add from '../components/goods/Add.vue'
-import Orders from '../components/orders/orders.vue'
-import Repost from '../components/repost/Repost.vue'
+
+// import Login from '../components/Login.vue'
+const Login = () => import(/*webpackChunkName: "Login_home_welcome"*/ '../components/Login.vue')
+// import Home from '../components/Home.vue'
+const Home = () => import(/*webpackChunkName: "Login_home_welcome"*/ '../components/Home.vue')
+// import Welcome from '../components/Welcome.vue'
+const Welcome = () => import(/*webpackChunkName: "Login_home_welcome"*/ '../components/Welcome.vue')
+
+// import Users from '../components/user/Users.vue'
+const Users = () => import(/*webpackChunkName: "Users_Rights_Roles"*/ '../components/user/Users.vue')
+// import Rights from '../components/power/Rights.vue'
+const Rights = () => import(/*webpackChunkName: "Users_Rights_Roles"*/ '../components/power/Rights.vue')
+// import Roles from '../components/power/Roles.vue'
+const Roles = () => import(/*webpackChunkName: "Users_Rights_Roles"*/ '../components/power/Roles.vue')
+
+// import Cate from '../components/goods/Cate.vue'
+const Cate = () => import(/*webpackChunkName: "Cate_Params"*/ '../components/goods/Cate.vue')
+// import Params from '../components/goods/Params.vue'
+const Params = () => import(/*webpackChunkName: "Cate_Params"*/ '../components/goods/Params.vue')
+
+// import GoodsList from '../components/goods/GoodsList.vue'
+const GoodsList = () => import(/*webpackChunkName: "GoodsList_Add"*/ '../components/goods/GoodsList.vue')
+// import Add from '../components/goods/Add.vue'
+const Add = () => import(/*webpackChunkName: "GoodsList_Add"*/ '../components/goods/Add.vue')
+
+// import Orders from '../components/orders/orders.vue'
+const Orders = () => import(/*webpackChunkName: "Orders_Repost"*/ '../components/orders/orders.vue')
+// import Repost from '../components/repost/Repost.vue'
+const Repost = () => import(/*webpackChunkName: "Orders_Repost"*/ '../components/repost/Repost.vue')
 
 // 解决路由重复报错问题
 const originalPush = VueRouter.prototype.push

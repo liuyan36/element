@@ -11,8 +11,8 @@
     <el-card>
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input placeholder="请输入内容" clearable>
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input placeholder="请输入内容" v-model="queryInfo.query">
+            <el-button slot="append" icon="el-icon-search" @click="queryOrderList"></el-button>
           </el-input>
         </el-col>
       </el-row>
@@ -20,6 +20,7 @@
       <!--订单列表数据-->
       <el-table :data="ordersList" border script>
         <el-table-column type="index"></el-table-column>
+        <el-table-column label="用户ID" prop="user_id"></el-table-column>
         <el-table-column label="订单编号" prop="order_number"></el-table-column>
         <el-table-column label="订单价格" prop="order_price"></el-table-column>
         <el-table-column label="是否付款" prop="pay_status">
@@ -29,6 +30,7 @@
           </template>
         </el-table-column>
         <el-table-column label="是否发货" prop="is_send"></el-table-column>
+        <el-table-column label="收货地址" prop="order_fapiao_title"></el-table-column>
         <el-table-column label="下单时间" prop="create_time">
           <template slot-scope="scope">{{scope.row.create_time | dateFormat}}</template>
         </el-table-column>
@@ -166,7 +168,12 @@ export default {
       this.progerssEd = res.data
      this.progerssDialogVisible = true
      console.log(this.progerssEd)
-    }
+    },
+     // 搜索框按钮点击事件
+    async queryOrderList() {
+      this.queryInfo.pagenum = 1;
+      this.getOrderList();
+    },
   }
 };
 </script>

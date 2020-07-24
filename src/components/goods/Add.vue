@@ -32,7 +32,7 @@
           @tab-click="tabsClick"
         >
           <!--为before-leave绑定到activeName和oldActiveName-->
-          <el-tab-pane label="基本信息aaa" name="0">
+          <el-tab-pane label="基本信息" name="0">
             <el-form-item label="商品名称" prop="goods_name">
               <el-input v-model="addForm.goods_name"></el-input>
             </el-form-item>

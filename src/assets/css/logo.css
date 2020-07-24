@@ -29,13 +29,10 @@ html, body ,#app {
     margin-top: 15px;
 }
 
-<<<<<<< HEAD
-=======
 .ql-editor {
     min-height: 300px;
 }
 
->>>>>>> cb0fb92... aaa
 body .el-table th.gutter { /*边框线不齐*/
     display: table-cell !important;
 }

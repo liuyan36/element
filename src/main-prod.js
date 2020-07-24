@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 // 导入富文本编辑器
 import VueQuillEditor from 'vue-quill-editor'
-import './plugins/element.js'
+// import './plugins/element.js'
 import 'default-passive-events'
 
 // 导入全局样式表
@@ -18,6 +18,9 @@ import 'quill/dist/quill.core.css' // import styles
 import 'quill/dist/quill.snow.css' // for snow theme
 import 'quill/dist/quill.bubble.css' // for bubble theme
 
+// 导入这个包的js和css
+import Nprogress from 'nprogress'
+
 // 配置axios请求发送
 import axios from 'axios'
 // 配置请求的路径
@@ -25,8 +28,15 @@ axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'
 
 // 配置axios拦截器
 axios.interceptors.request.use(config => {
+  // 在request拦截器中展示进度条，Nprogress.start()
+    Nprogress.start()
     config.headers.Authorization = window.sessionStorage.getItem('token')
   // 在最后必须要return config
+  return config
+})
+// 在拦截器中隐藏进度条 Nprogerss.done()
+axios.interceptors.response.use(config => {
+  Nprogress.done()
   return config
 })
 
