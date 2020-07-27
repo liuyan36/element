@@ -12,7 +12,7 @@
       <!--添加角色按钮区-->
       <el-row>
         <el-col>
-          <el-button type="primary" @click="rolesDialogVisible = true">添加角色</el-button>
+          <el-button type="primary" @click="rolesAdd">添加角色</el-button>
         </el-col>
       </el-row>
 
@@ -103,99 +103,37 @@
     </el-card>
 
     <!--添加角色对话框-->
-    <el-dialog title="提示" :visible.sync="rolesDialogVisible" width="50%" @close="rolesDialogClosed">
-      <el-form :model="rolesFrom" ref="rolesFromRef" label-width="100px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="rolesFrom.roleName"></el-input>
-        </el-form-item>
-        <el-form-item label="角色描述" prop="roleDesc">
-          <el-input v-model="rolesFrom.roleDesc"></el-input>
-        </el-form-item>
-      </el-form>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="rolesDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addRoles">确 定</el-button>
-      </span>
-    </el-dialog>
+    <roles-add v-if="roleAdd" ref="addRoles" @refreshDataList="getRolesList"></roles-add>
 
     <!--修改用户对话框-->
-    <el-dialog title="修改用户权限" :visible.sync="editRolesDialogVisible" width="50%">
-      <el-form :model="editRolesFrom" ref="editRolesRef" :rules="editRolesRules" label-width="100px">
-        <el-form-item label="分类昵称" prop="editRolesFromName">
-          <el-input v-model="editRolesFrom.editRolesFromName"></el-input>
-          <!--使用disabled来禁用-->
-        </el-form-item>
-
-        <el-form-item label="角色描述" prop="editRolesFromDesc">
-          <el-input v-model="editRolesFrom.editRolesFromDesc"></el-input>
-          <!--使用disabled来禁用-->
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="editRolesDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editRolesInfo">确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <roles-show v-if="roleShow" ref="showRole"  @refreshDataList="getRolesList"></roles-show>
     <!--分配权限对话框-->
-    <el-dialog title="分配权限" :visible.sync="steRightDialogVisible" width="50%" @close="steRightDialogClose">
-     <!--树形控件, 通过冒号data指定数据源，tongg冒号props属性绑定对象-->
-     <!--show-checkbox{复选框可选择的} node-key="id"{唯一的可选值框}-->
-     <!--default-checked-keys 默认勾选的树形组件-->
-      <el-tree :data="rightsList" :props="terrProps"
-                show-checkbox node-key="id" default-expand-all
-                :default-checked-keys="defEdKy" ref="terrRef"></el-tree>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="steRightDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="allotRightDialog">确 定</el-button>
-      </span>
-    </el-dialog>
+    <roles-sta v-if="roleSta" ref="staRole" @refreshDataList="getRolesList"></roles-sta>
   </div>
 </template>
 
 <script>
+import RolesAdd from './Roles/roles-add'
+import RolesShow from './Roles/roles-show'
+import RolesSta from './Roles/roles-staRoles'
+
 export default {
   name: "Roles",
+  components: {
+    RolesAdd,
+    RolesShow,
+    RolesSta
+  },
   data() {
     return {
       // 所有角色列表数据
       roleList: [],
-      // 添加权限角色数据
-      rolesFrom: {
-        roleId: "",
-        roleName: "",
-        roleDesc: ""
-      },
       // 点击添加对话框的显示与隐藏
-      rolesDialogVisible: false,
+      roleAdd: false,
       // 控制修改对话框的显示与隐藏
-      editRolesDialogVisible: false,
+      roleShow: false,
       // 控制对话框的显示与隐藏
-      steRightDialogVisible: false,
-      //所有权限的数据
-      rightsList: [],
-      // 添加编辑表单的规则对象
-      editRolesRules: {
-        editRolesFromName: [
-          { required: true, message: "请输入角色名称", trigger: "blur" }
-        ]
-      },
-      // 树形控件的绑定对象
-      terrProps: {
-        label: 'authName',
-        children: 'children'
-      },
-      // 默认选中的节点id值数组
-      defEdKy: [],
-      // 当前即将分配权限的角色id
-      roleId:'',
-      // 编辑修改用户规则
-      editRolesFrom: {
-        editRolesFromId: 0,
-        editRolesFromName: '',
-        editRolesFromDesc: ''
-      },
+      roleSta: false
     };
   },
   created() {
@@ -211,24 +149,12 @@ export default {
 
       this.roleList = res.data;
     },
-    // 对话框消失就重置内容
-    rolesDialogClosed() {
-      this.$refs.rolesFromRef.resetFields();
-    },
-    // 添加用户成功
-    addRoles() {
-      this.$refs.rolesFromRef.validate(async valid => {
-        if (!valid) return {};
-        const { data: res } = await this.$http.post("roles", this.rolesFrom);
-        if (res.meta.status !== 201) {
-          this.$message.error("添加用户失败");
-        } else {
-          this.$message.success("添加用户成功");
-        }
-        console.log(res);
-        this.rolesDialogVisible = false;
-        this.getRolesList();
-      });
+    // 添加按钮操作
+    rolesAdd() {
+      this.roleAdd = true
+      this.$nextTick(() => {
+        this.$refs.addRoles.init()
+      })
     },
     // 根据id删除该用户
     async removeRolesById(id) {
@@ -286,79 +212,24 @@ export default {
     },
     // 展示分配权限对话框
     async showSteRightDia(role) {
-      this.roleId = role.id
-      // 获取所有权限数据
-      const { data: res } = await this.$http.get("rights/tree");
-      if (res.meta.status !== 200) {
-        return this.$message.error("获取失败");
-      }
-      // 获取到的权限数据保存到data中
-      this.rightsList = res.data;
-      console.log(this.rightsList);
-      // 获取三级权限的id
-      // 从创建defEdKy 然后传入role，然后递归传入到defEdKy中
-      this.getTerrKeys(role, this.defEdKy)
-      this.steRightDialogVisible = true;
-    },
-    // 通过递归的形式，将获取角色下的三级权限的id，并保存到defEdKy数组中，
-    getTerrKeys(node, arr) {
-      // 如果当前节点不包含children属性，则是三级权限
-      if(!node.children) {
-        return arr.push(node.id)
-      }
-      node.children.forEach(item => {
-        this.getTerrKeys(item, arr)
+      this.roleSta = true
+      this.$nextTick(() => {
+        this.$refs.staRole.roles = role
+        this.$refs.staRole.roleId = role.id
+        this.$refs.staRole.init()
       })
     },
-    // 监听分配权限对话框的关闭事件
-    steRightDialogClose() {
-      this.defEdKy = []
-    },
-    // 点击为角色分配权限
-    async allotRightDialog() {
-      const keys = [
-        ...this.$refs.terrRef.getCheckedKeys(),
-        ...this.$refs.terrRef.getHalfCheckedKeys()
-      ]
-      const idStr = keys.join(',')
-
-      const {data:res} = await this.$http.post(`roles/${this.roleId}/rights`, {rids: idStr})
-      // 拿到接口数据后 判断status来进行，失败就弹出失败
-      if(res.meta.status !== 200) {
-        return this.$message.error('分配权限失败')
-      }
-      this.$message.success('分配权限成功')
-      // 分配完后刷新页面
-      this.getRolesList()
-      // 然后将其关闭
-      this.steRightDialogVisible = false
-     },
     // 展示编辑用户的对话框
     async showEditDialog(roleList) {
       console.log(roleList)
-      this.editRolesFrom.editRolesFromId = roleList.id
-      this.editRolesFrom.editRolesFromName = roleList.roleName
-      this.editRolesFrom.editRolesFromDesc = roleList.roleDesc
-      this.editRolesDialogVisible = true
+      this.roleShow = true
+      this.$nextTick(() => {
+        this.$refs.showRole.editRolesFrom.editRolesFromId = roleList.id
+        this.$refs.showRole.editRolesFrom.editRolesFromName = roleList.roleName
+        this.$refs.showRole.editRolesFrom.editRolesFromDesc = roleList.roleDesc
+        this.$refs.showRole.init()
+      })
     },
-    // 提交并修改用户对话的内容
-    editRolesInfo() {
-       this.$refs.editRolesRef.validate(async valid => {
-         const {data: res} = await this.$http.put('roles/' + this.editRolesFrom.editRolesFromId, {
-           roleName: this.editRolesFrom.editRolesFromName,
-           roleDesc: this.editRolesFrom.editRolesFromDesc
-         })
-         console.log({data: res})
-
-         if(res.meta.status !== 200) {
-           return this.$message.error('修改用户权限失败')
-         }
-
-         this.$message.success('修改用户成功')
-         this.getRolesList()
-         this.editRolesDialogVisible = false
-       })
-    }
   }
 };
 </script>

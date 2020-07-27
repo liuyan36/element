@@ -63,48 +63,22 @@
     </el-card>
 
     <!--添加角色对话框-->
-    <el-dialog title="添加分类" :visible.sync="addCateDialogVisible" width="50%" @close="CatedDialogVisible">
-      <el-form :model="addCateFrom" :rules="addCateRules" ref="addCateFromRef" label-width="100px">
-        <el-form-item label="分类名称" prop="cat_name">
-          <el-input v-model="addCateFrom.cat_name"></el-input>
-        </el-form-item>
-        <el-form-item label=" 父级分类：">
-          <!--用来指定数据源-->
-          <!--Props 用来指定配置对象-->
-          <el-cascader
-            expand-trigger="hover"
-            v-model="selectionKeys"
-            :props="cascaderProps"
-            :options="parentCateList"
-            @change="parentCateChanged"
-            clearable change-on-select></el-cascader>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addCateDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addCate">确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <cate-remove-cate v-if="cateRemove" ref="removeCate" @refreshDataList="getCateList"></cate-remove-cate>
     <!--编辑对话框-->
-    <el-dialog title="修改分类" :visible.sync="editCateDialogVisible" width="50%">
-      <el-form :model="editCateFrom" :rules="editCateRules" ref="editCateFromRef" label-width="100px">
-        <el-form-item label="分类昵称" prop="editCateFromName">
-          <el-input v-model="editCateFrom.editCateFromName"></el-input>
-          <!--使用disabled来禁用-->
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="editCateDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editCateInfo">确 定</el-button>
-      </span>
-    </el-dialog>
+    <cate-show v-if="showEdit" ref="editShow" @refreshDataList="getCateList"></cate-show>
   </div>
 </template>
 
 <script>
+import CateShow from './Cate/Cate-show'
+import CateRemoveCate from './Cate/Cate-removeCate'
+
 export default {
   name: "Cate",
+  components: {
+    CateShow,
+    CateRemoveCate
+  },
   data() {
     return {
       // 查询条件
@@ -117,20 +91,6 @@ export default {
       cateList: [],
       // 总数据条数
       total: 0,
-      // 点击添加对话框的控制与隐藏
-      addCateDialogVisible: false,
-      // 点击编辑对话框的控制与隐藏
-      editCateDialogVisible: false,
-      // 添加分类的表单对象
-      addCateFrom: {
-        // 添加将要分类的昵称
-        cat_name: '',
-        // 父级分类的id
-        cat_pid: 0,
-        // 分类的等级，默认是一级为0
-        cat_level: 0
-
-      },
       // 为table属性制作标题
       columns: [{
         label: '分类名称',
@@ -155,33 +115,8 @@ export default {
         // 表示当前使用这一列模板的名称
         template: 'opt'
       }],
-      // 添加分类表单的规则对象
-      addCateRules: {
-        cat_name: [
-          { required: true, message: "请输入分类名称", trigger: "blur" },
-        ],
-      },
-      // 添加编辑表单的规则对象
-      editCateRules: {
-        editCateFromName: [
-          { required: true, message: "请输入分类名称", trigger: "blur" }
-        ]
-      },
-      // 父级分类的列表
-      parentCateList: [],
-      // 用来指定级联选择器的配置对象
-      cascaderProps: {
-        value: 'cat_id',
-        label: 'cat_name',
-        children: 'children'
-      },
-      // 选择父级id的数组
-      selectionKeys: [],
-      // 查询到的用户规则
-      editCateFrom: {
-        editCateFromId: 0,
-        editCateFromName: ''
-      }
+      showEdit: false,
+      cateRemove: false
     }
   },
   created() {
@@ -214,63 +149,13 @@ export default {
     },
     // 点击按钮展示分类对话框
     showAddCateDialog() {
-      // 先获取父级分类列表
-      this.getParentCateList()
       // 然后在展示出对话框
-      this.addCateDialogVisible = true
-    },
-    // 获取父级分类的数据列表
-    async getParentCateList() {
-      const {data: res} = await this.$http.get('categories',{params:{type: 2}})
-
-      if(res.meta.status !== 200) {
-        return this.$message.error('获取父级分类列表失败')
-      }
-      console.log(res.data)
-      this.parentCateList = res.data
-    },
-    // 选择项发生变化触发这个函数
-    parentCateChanged() {
-      console.log(this.selectionKeys)
-      // 如果selctionKeys 数组中的length 大于0，证明选中的父级分类
-      // 反之， 就说明没有选择如何父级分类
-      if(this.selectionKeys.length > 0) {
-        // 父级的id
-        this.addCateFrom.cat_pid =  this.selectionKeys[
-          this.selectionKeys.length -1
-        ]
-        // 为当前分类的等级赋值
-          this.addCateFrom.cat_level = this.selectionKeys.length
-          return
-      } else {
-          this.addCateFrom.cat_pid = 0
-        // 为当前分类的等级赋值
-          this.addCateFrom.cat_level = 0
-      }
-    },
-    addCate() {
-      this.$refs.addCateFromRef.validate(async valid => {
-        if(!valid) {
-          return this.$message.error('校验失败')
-        }
-        const {data: res} = await this.$http.post('categories', this.addCateFrom)
-        if(res.meta.status !== 201) {
-          return this.$message.error('添加失败')
-        }
-        this.$message.success('添加分类成功')
-        // 添加成功刷新数据
-        this.getCateList()
-        // 添加成功关闭对话框
-        this.addCateDialogVisible = false
+      this.cateRemove = true
+      this.$nextTick(() => {
+        this.$refs.removeCate.init()
       })
     },
-    // 添加对话框关闭时重置表单的操作
-    CatedDialogVisible() {
-      this.$refs.addCateFromRef.resetFields()
-      this.selectionKeys = []
-      this.addCateFrom.cat_level = 0
-      this.addCateFrom.cat_pid = 0
-    },
+
     // 表格的删除功能
     async removeCate(cat_id) {
       console.log(cat_id)
@@ -303,27 +188,11 @@ export default {
     // 表格的编辑功能
     showEditDialog(cateList) {
       console.log(cateList)
-      this.editCateFrom.editCateFromId = cateList.cat_id
-      this.editCateFrom.editCateFromName = cateList.cat_name
-      this.editCateDialogVisible = true
-    },
-    // 表格的编辑提交功能
-    editCateInfo() {
-      this.$refs.editCateFromRef.validate(async valid => {
-        if(!valid) return ;
-        //发起编辑信息的修改请求
-        const {data: res } = await this.$http.put("categories/" + this.editCateFrom.editCateFromId, {
-          cat_name: this.editCateFrom.editCateFromName
-        })
-        console.log({ data: res })
-
-        if(res.meta.status !== 200) {
-          return this.$message.error('更新失败')
-        }
-
-        this.$message.success('更新成功')
-        this.getCateList()
-        this.editCateDialogVisible = false
+      this.showEdit = true
+       this.$nextTick(() => {
+        this.$refs.editShow.editCateFrom.editCateFromId = cateList.cat_id
+        this.$refs.editShow.editCateFrom.editCateFromName = cateList.cat_name
+        this.$refs.editShow.init()
       })
     }
   }

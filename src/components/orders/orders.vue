@@ -55,45 +55,22 @@
     ></el-pagination>
 
     <!--修改用户对话框-->
-    <el-dialog title="修改地址" :visible.sync="modifyDialogVisible" width="50%" @close="modifyClose">
-      <el-form :model="modifyFrom" :rules="modifyRules" ref="modifyFormRef" label-width="100px">
-        <el-form-item label="省市区/县" prop="modifyFrom1">
-          <el-cascader :options="cityData" v-model="modifyFrom.modifyFrom1"></el-cascader>
-        </el-form-item>
-        <el-form-item label="详细地址" prop="modifyFrom2">
-          <el-input v-model="modifyFrom.modifyFrom2"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="modifyDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="modifyDialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <orders-list v-if="listAbord" ref="abordList" @refreshDataList="getOrdersList"></orders-list>
     <!--展示物流地理位置对话框-->
-    <el-dialog title="物流进度" :visible.sync="progerssDialogVisible" width="50%">
-      <!--时间线-->
-      <el-timeline>
-        <el-timeline-item
-          v-for="(activity, index) in progerssEd"
-          :key="index"
-          :timestamp="activity.time">
-          {{activity.context}}
-        </el-timeline-item>
-      </el-timeline>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="progerssDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="progerssDialogVisible = false">确 定</el-button>
-      </span>
-    </el-dialog>
+    <orders-item v-if="proGerss" ref="gerssPro" @refreshDataList="getOrdersList"></orders-item>
   </div>
 </template>
 
 <script>
-import cityData from "./citydata";
+import ordersList from './Orders/orders-list'
+import ordersItem from './Orders/orders-positioning'
 
 export default {
   name: "orders",
+  components: {
+    ordersList,
+    ordersItem
+  },
   data() {
     return {
       queryInfo: {
@@ -104,28 +81,8 @@ export default {
       total: 0,
       // 获取数据列表
       ordersList: [],
-      // 控制修改地址的显示与隐藏
-      modifyDialogVisible: false,
-      // 数据对象
-      modifyFrom: {
-        modifyFrom1: [],
-        modifyFrom2: ""
-      },
-      // 校验规则对象
-      modifyRules: {
-        modifyFrom1: [
-          { required: true, message: "请选择省市区/县", trigger: "blur" }
-        ],
-        modifyFrom2: [
-          { required: true, message: "请填写详细地址", trigger: "blur" }
-        ]
-      },
-      cityData,
-      // 控制物流对话的显示与隐藏
-      progerssDialogVisible: false,
-      //
-      progerssEd: []
-
+      listAbord: false,
+      proGerss: false,
     };
   },
   created() {
@@ -153,21 +110,17 @@ export default {
     },
     // 修改地址的对话框显示与隐藏
     editClicked() {
-      this.modifyDialogVisible = true;
+      this.listAbord = true
+      this.$nextTick(() => {
+        this.$refs.abordList.init()
+      })
     },
-    // 表单关闭重置
-    modifyClose() {
-      this.$refs.modifyFormRef.resetFields();
-    },
-    async showProgerssBox() {
-      const {data:res} = await this.$http.get('/kuaidi/1106975712662')
-      if(res.meta.status !== 200) {
-        return this.$message.error('查询物流进度失败')
-      }
-
-      this.progerssEd = res.data
-     this.progerssDialogVisible = true
-     console.log(this.progerssEd)
+    showProgerssBox() {
+      console.log('1111')
+      this.proGerss = true
+      this.$nextTick(() => {
+        this.$refs.gerssPro.init()
+      })
     },
      // 搜索框按钮点击事件
     async queryOrderList() {

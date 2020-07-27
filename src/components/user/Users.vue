@@ -21,7 +21,7 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
+          <el-button type="primary" @click="addUserList">添加用户</el-button>
         </el-col>
       </el-row>
 
@@ -51,7 +51,7 @@
                 type="primary"
                 icon="el-icon-edit"
                 size="small"
-                @click="showEditDialog(scope.row.id)"
+                @click="showEditDialog(scope.row)"
               ></el-button>
             </el-tooltip>
             <!--删除按钮-->
@@ -84,98 +84,28 @@
       ></el-pagination>
     </el-card>
 
-    <!--添加用户对话框-->
-    <!--在这里监听表单的重置  绑定 @close 进行操作-->
-    <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
-      <!--内容主体区-->
-      <el-form :model="addFrom" :rules="addFromRules" ref="addFromRef" label-width="70px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addFrom.username"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="addFrom.password"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addFrom.email"></el-input>
-        </el-form-item>
-        <el-form-item label="手机" prop="mobile">
-          <el-input v-model="addFrom.mobile"></el-input>
-        </el-form-item>
-      </el-form>
-      <!--底部区-->
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addUsers">确 定</el-button>
-      </span>
-    </el-dialog>
     <!--应该用户对话框-->
-    <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
-      <el-form :model="editFrom" :rules="editFromRules" ref="editFromRef" label-width="70px">
-        <el-form-item label="用户名">
-          <el-input v-model="editFrom.username" disabled></el-input>
-          <!--使用disabled来禁用-->
-        </el-form-item>
-
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editFrom.email"></el-input>
-        </el-form-item>
-
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="editFrom.mobile"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="editDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="editUserInfo">确 定</el-button>
-      </span>
-    </el-dialog>
-
+    <user-show v-if="userShow" ref="showUser" @refreshDataList="getUsersList"></user-show>
+    <!--添加用户对话框-->
+    <add-user-list v-if="addUser" ref="userAdd" @refreshDataList="getUsersList"></add-user-list>
     <!--分配角色对话框-->
-    <el-dialog title="分配角色" :visible.sync="steRoleDialogVisible" width="50%" @close="staRoleDialogClose">
-      <div>
-        <p>当前的用户：{{userinfo.username}}</p>
-        <p>当前的角色：{{userinfo.role_name}}</p>
-        <p>分配新角色:
-          <el-select v-model="selectedRoleId" placeholder="请选择">
-            <el-option
-              v-for="item in rolesList"
-              :key="item.id"
-              :label="item.roleName"
-              :value="item.id">
-            </el-option>
-          </el-select>
-        </p>
-      </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="steRoleDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="seveRoleInfo">确 定</el-button>
-      </span>
-    </el-dialog>
+    <ste-role v-if="SteRole" ref="RoleSte" @refreshDataList="getUsersList"></ste-role>
   </div>
 </template>
 
 <script>
+import UserShow from './User/user-show'
+import AddUserList from './User/user-add'
+import steRole from './User/user-steRole'
+
 export default {
   name: "Users",
+  components: {
+    UserShow,
+    AddUserList,
+    steRole
+  },
   data() {
-    // 验证邮箱的自定义规则
-    var checkEmail = (rule, value, cb) => {
-      // 验证邮箱的正则表达式
-      const regEmail = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/;
-      if (regEmail.test(value)) {
-        return cb();
-      }
-      cb(new Error("请输入合法的邮箱"));
-    };
-    // 验证手机号的规则
-    var checkMobile = (rule, value, cb) => {
-      // 验证手机号的正则表达式
-      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/;
-      if (regMobile.test(value)) {
-        return cb();
-      }
-      cb(new Error("请输入合法的手机号"));
-    };
     return {
       // 获取用户列表的参数对象
       queryInfo: {
@@ -183,69 +113,14 @@ export default {
         pagenum: 1,
         pagesize: 2
       },
-      // 添加用户的表单数据
-      addFrom: {
-        username: "",
-        password: "",
-        email: "",
-        mobile: ""
-      },
       userList: [],
       total: 0,
-      // 控制对话框的显示与隐藏
-      addDialogVisible: false,
+      // 控制添加用户的对话框显示与隐藏
+      addUser: false,
       // 控制修改用户的对话框显示与隐藏
-      editDialogVisible: false,
-      // 查询到的用户信息duix
-      editFrom: {},
-      // 验证规则名称名称对象
-      addFromRules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          {
-            min: 3,
-            max: 10,
-            message: "请取用户名范围是3到10个名字之间",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          {
-            min: 8,
-            max: 15,
-            message: "请输入密码范围是8到15个字母、数字、符号",
-            trigger: "blur"
-          }
-        ],
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
-      },
-      // 修改表单的验证规则对象
-      editFromRules: {
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
-      },
+      userShow: false,
       // 控制分配角色对话框的显示与隐藏
-      steRoleDialogVisible: false,
-      // 需要分配的角色信息
-      userinfo: {},
-      //所有角色的数据列表
-      rolesList: [],
-      // 已选中的角色id值
-      selectedRoleId: ''
+      SteRole: false,
     };
   },
   created() {
@@ -275,67 +150,21 @@ export default {
       }
       this.$message.success("更新用户状态成功");
     },
-    // 监听添加用户对话框的关闭事件，只要触发就关闭，进行重置
-    addDialogClosed() {
-      this.$refs.addFromRef.resetFields();
-    },
-    // 点击按钮添加新用户,.validate函数
-    addUsers() {
-      this.$refs.addFromRef.validate(async valid => {
-        if (!valid) return {};
-        // 如果通过了，就直接发起添加的请求
-        const { data: res } = await this.$http.post("users", this.addFrom);
-        console.log(this.addFrom);
-        if (res.meta.status !== 201) {
-          this.$message.error("添加用户失败");
-        } else {
-          this.$message.success("添加用户成功");
-        }
-        console.log(res);
-        console.log(res.meta.status);
-        // 当判断成功的时候，添加隐藏用户框
-        this.addDialogVisible = false;
-        // 重新获取用户数据
-        this.getUsersList();
-      });
+    // 添加用户的对话框显示与隐藏
+    addUserList() {
+      this.addUser = true
+      this.$nextTick(() => {
+        this.$refs.userAdd.init()
+      })
     },
     // 展示编辑用户的对话框
-    async showEditDialog(id) {
-      const { data: res } = await this.$http.get("users/" + id);
-      console.log({ data: res });
-      if (res.meta.status !== 200) {
-        return this.$message.error("查询失败");
-      }
-      this.editFrom = res.data;
-      this.editDialogVisible = true;
-    },
-    // 点击取消重置
-    editDialogClosed() {
-      this.$refs.editFromRef.resetFields();
-    },
-    // 修改用户信息点击提交
-    editUserInfo() {
-      this.$refs.editFromRef.validate(async valid => {
-        if (!valid) return;
-        // 发起用户信息的修改请求
-        // async 和 await  是为了简化prosime网络请求
-        const { data: res } = await this.$http.put(
-          "users/" + this.editFrom.id,
-          {
-            email: this.editFrom.email,
-            mobile: this.editFrom.mobile
-          }
-        );
-        if (res.meta.status !== 200) {
-          this.$message.error("更新用户信息失败！");
-        }
-        // 关闭对话框
-        this.editDialogVisible = false;
-        // 刷新数据列表
-        this.getUsersList();
-        // 提示修改成功
-        this.$message.success("更新用户信息成功！");
-      });
+    async showEditDialog(userList) {
+     // console.log(userList)
+      this.userShow = true
+      this.$nextTick(() => {
+        this.$refs.showUser.showId = userList.id
+        this.$refs.showUser.init()
+      })
     },
     // 根据id删除用户信息
     async removeUserById(id) {
@@ -373,37 +202,13 @@ export default {
       this.getUsersList();
     },
     // 展示分配角色的对话框
-    async steRole(userinfo) {
-      this.userinfo = userinfo
-      // 在展示对话框之前，获取所有角色列表
-      const {data: res} = await this.$http.get('roles')
-      if(res.meta.status !== 200) {
-        return this.$message.error('获取角色列表')
-      }
-
-      this.rolesList = res.data
-
-      this.steRoleDialogVisible = true
-    },
-    // 点击按钮分配角色
-    async seveRoleInfo() {
-      if(!this.selectedRoleId) {
-        return this.$message.error('请选择一个分配角色')
-      }
-      const {data:res} = await this.$http.put(`users/${this.userinfo.id}/role`, {
-        rid: this.selectedRoleId
+    steRole(userinfo) {
+      console.log(userinfo)
+      this.SteRole = true
+      this.$nextTick(() => {
+        this.$refs.RoleSte.userinfo = userinfo
+        this.$refs.RoleSte.init()
       })
-      if(res.meta.status !== 200) {
-        return this.$message.error('更新分配角色失败')
-      }
-      this.$message.success('分配角色成功')
-      this.getUsersList()
-      this.steRoleDialogVisible = false
-    },
-    // 分配角色对话框的关闭事件
-    staRoleDialogClose() {
-      this.selectedRoleId = '',
-      this.userinfo = {}
     }
   }
 };

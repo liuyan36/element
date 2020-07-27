@@ -33,7 +33,7 @@
         <el-tab-pane label="动态参数" name="many">
           <!--添加动态参数的按钮-->
           <!--通过计算属性声明isBtnDialog属性返回的布尔值来控制按钮的启动和关闭-->
-          <el-button type="primary" :disabled="isBtnDialog" @click="addDialogVisible = true">添加参数</el-button>
+          <el-button type="primary" :disabled="isBtnDialog" @click="addParams">添加参数</el-button>
           <!--动态参数的数据源-->
           <el-table :data="manyTableData" border stript>
             <!--展开行-->
@@ -124,25 +124,8 @@
     </el-card>
 
     <!--添加参数的对话框-->
-    <el-dialog
-      :title="'添加' + titleText "
-      :visible.sync="addDialogVisible"
-      width="50%"
-      @close="addDialogColsed"
-    >
-      <!--添加参数对话框-->
-      <el-form :model="addFrom" :rules="addFromRules" ref="addFromRef" label-width="100px">
-        <el-form-item :label="titleText" prop="attr_name">
-          <el-input v-model="addFrom.attr_name"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addParamsInfo">确 定</el-button>
-      </span>
-    </el-dialog>
-
-    <!--修改参数的对话框-->
+    <params-add v-if="paramAdd" ref="AddParams" @refreshDataList="getCateList"></params-add>
+     <!--修改参数的对话框-->
     <el-dialog
       :title="'修改' + titleText "
       :visible.sync="editDialogVisible"
@@ -164,8 +147,13 @@
 </template>
 
 <script>
+import paramsAdd from './Params/params-add'
+
 export default {
   name: "params",
+  components: {
+    paramsAdd
+  },
   data() {
     return {
       cateList: [],
@@ -184,17 +172,7 @@ export default {
       // 这是静态属性的数据
       onlyTableData: [],
       // 控制添加对话框的显示与隐藏
-      addDialogVisible: false,
-      // 这是添加表单的数据对象
-      addFrom: {
-        attr_name: ""
-      },
-      // 验证表单的验证规则的对象
-      addFromRules: {
-        attr_name: [
-          { required: true, message: "请输入参数名称", trigger: "blur" }
-        ]
-      },
+      paramAdd: false,
       // 控制修改对话框的显示与隐藏
       editDialogVisible: false,
       // 修改的表单数据对象
@@ -292,32 +270,17 @@ export default {
         this.onlyTableData = res.data;
       }
     },
-    // 监听对话框关闭重置
-    addDialogColsed() {
-      this.$refs.addFromRef.resetFields();
-    },
-    // 点击按钮添加参数
-    addParamsInfo() {
-      this.$refs.addFromRef.validate(async valid => {
-        if (!valid) return;
-        const { data: res } = await this.$http.post(
-          `categories/${this.cateId}/attributes`,
-          {
-            attr_name: this.addFrom.attr_name,
-            attr_sel: this.activeName
-          }
-        );
-        console.log(this.cateId);
-        if (res.meta.status !== 201) {
-          return this.$message.error("添加失败");
-        }
-        this.$message.success("添加成功");
-        this.addDialogVisible = false;
-        this.getParamsData();
-      });
-    },
     // 点击按钮展示修改对话框
-    async showEditDialog(attr_id) {
+    async showEditDialog(cateList) {
+      console.log(cateList)
+      this.paramShow = true
+      this.$nextTick(() => {
+        this.$refs.showParams.selectCateList = this.selectCateList
+        this.$refs.showParams.attr_id = cateList.attr_id
+        this.$refs.showParams.init()
+      })
+      },
+     async showEditDialog(attr_id) {
       const { data: res } = await this.$http.get(
         `categories/${this.cateId}/attributes/${attr_id}`,
         {
@@ -426,6 +389,13 @@ export default {
     handleClose(index, row) {
       row.attr_vals.splice(index, 1)
       this.attrActiveLisr(row)
+    },
+    addParams() {
+      this.paramAdd = true
+      this.$nextTick(() => {
+        this.$refs.AddParams.selectCateList = this.selectCateList
+        this.$refs.AddParams.init()
+      })
     }
   }
 };
