@@ -28,9 +28,9 @@
       <!--用户列表区-->
       <el-table :data="userList" stripe border>
         <el-table-column type="index"></el-table-column>
-        <el-table-column label="ID" prop="id"></el-table-column>
-        <el-table-column label="姓名" prop="username"></el-table-column>
-        <el-table-column label="邮箱" prop="email"></el-table-column>
+        <el-table-column label="ID" prop="id" width="100px"></el-table-column>
+        <el-table-column label="姓名" prop="username" width="120px"></el-table-column>
+        <el-table-column label="邮箱" prop="email" width="140px"></el-table-column>
         <el-table-column label="电话" prop="mobile"></el-table-column>
         <el-table-column label="角色" prop="role_name"></el-table-column>
         <el-table-column label="状态">
@@ -50,7 +50,7 @@
               <el-button
                 type="primary"
                 icon="el-icon-edit"
-                size="small"
+                size="mini"
                 @click="showEditDialog(scope.row)"
               ></el-button>
             </el-tooltip>
@@ -59,13 +59,13 @@
               <el-button
                 type="danger"
                 icon="el-icon-delete"
-                size="small"
+                size="mini"
                 @click="removeUserById(scope.row.id)"
               ></el-button>
             </el-tooltip>
             <!--分配角色按钮-->
             <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="small"
+              <el-button type="warning" icon="el-icon-setting" size="mini"
                         @click="steRole(scope.row)"></el-button>
             </el-tooltip>
           </template>
