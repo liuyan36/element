@@ -80,7 +80,7 @@ export default {
       // 获取所有的菜单
       const {data: res} = await this.$http.get('menus')
       if (res.meta.status !== 200) return this.$message.error(res.meta.status)
-      console.log(res)
+      console.log(res.data)
       this.menuList = res.data
     },
     toggleCollapse() {
