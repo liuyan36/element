@@ -31,9 +31,9 @@
         <el-table-column label="ID" prop="id" width="100px"></el-table-column>
         <el-table-column label="姓名" prop="username" width="120px"></el-table-column>
         <el-table-column label="邮箱" prop="email" width="140px"></el-table-column>
-        <el-table-column label="电话" prop="mobile"></el-table-column>
-        <el-table-column label="角色" prop="role_name"></el-table-column>
-        <el-table-column label="状态">
+        <el-table-column label="电话" prop="mobile" width="120px"></el-table-column>
+        <el-table-column label="角色" prop="role_name" width="100px"></el-table-column>
+        <el-table-column label="状态" width="100px">
           <template slot-scope="scope">
             <el-switch @change="userStateChange(scope.row)" v-model="scope.row.mg_state"></el-switch>
           </template>
